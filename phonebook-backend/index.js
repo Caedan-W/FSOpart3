@@ -1,7 +1,16 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 
 app.use(express.json())
+
+// 自定义 token 函数，用于记录请求体
+morgan.token('req-body', (req, res) => JSON.stringify(req.body));
+
+// 使用 morgan 中间件，并添加自定义 token 函数
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :req-body'));
+
 
 let persons = [
     { 
@@ -25,7 +34,6 @@ let persons = [
         "number": "39-23-6423122"
     }
 ]
-
 
 app.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
@@ -75,7 +83,7 @@ const generateRandomId = () => {
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
-    console.log('body', body)
+    //console.log('body', body)
 
     if (!body) {
         return response.status(400).json({ 
@@ -113,3 +121,10 @@ const PORT = 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
+
+
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
