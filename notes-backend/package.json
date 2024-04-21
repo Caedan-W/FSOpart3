@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../../FullStackOpenExercise/part2/notes-frontend && npm run build && @powershell Copy-Item dist -Recurse ../../../FSOpart3/notes-backend/dist",
+    "deploy": "fly deploy",
+    "deploy:full": "npm run build:ui && npm run deploy",    
+    "logs:prod": "fly logs"
   },
   "author": "Caedan Wang",
   "license": "MIT",
@@ -19,3 +23,5 @@
     "nodemon": "^3.1.0"
   }
 }
+
+
