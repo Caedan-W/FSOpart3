@@ -1,6 +1,9 @@
+require('dotenv').config()
+
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/phonebook')
 
 const app = express()
 
@@ -14,7 +17,7 @@ morgan.token('req-body', (req, res) => JSON.stringify(req.body));
 // 使用 morgan 中间件，并添加自定义 token 函数
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :req-body'));
 
-
+/*
 let persons = [
     { 
         "id": 1,
@@ -37,33 +40,45 @@ let persons = [
         "number": "39-23-6423122"
     }
 ]
+*/
 
 app.get('/', (request, response) => {
     response.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+        response.json(persons)
+        console.log(persons)
+    })
 })
+
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-    
-    if (person) {
-        response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    //const id = Number(request.params.id)
+    Person.findById(request.params.id)
+        .then(person => {
+                response.json(person)
+        })
+        .catch(error => {
+            console.error('Error fetching person:', error)
+            response.status(404).json({ error: 'person not found' })
+        })
+
 })
 
+
 app.get('/info',(request, response) => {
-    const number = persons.length
+    const returnedPerson = Person.find({})
+    // console.log('typeof Person',typeof Person)
+    // console.log('typeof returnedPerson', typeof returnedPerson)
+    // console.log('returnedPerson ', returnedPerson)
+    // returnedPerson.then(person => console.log('then, returnedPerson', person))
     const time = new Date().toString();
-    console.log(time)
-    response.send(
-            `Phonebook has info for ${number} people<br><br>${time}`
-    )
+    //console.log(time)
+    returnedPerson.then(person => {
+        response.send(`Phonebook has info for ${person.length} people<br><br>${time}`)
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -84,14 +99,12 @@ const generateRandomId = () => {
     return Math.floor(Math.random() * 10000)
 }
 
+
 app.post('/api/persons', (request, response) => {
     const body = request.body
-    //console.log('body', body)
 
     if (!body) {
-        return response.status(400).json({ 
-            error: 'content missing' 
-        })
+        return response.status(400).json({ error: 'content missing' })
     }
     else if (!body.name){
         return response.status(400).json({ 
@@ -103,25 +116,28 @@ app.post('/api/persons', (request, response) => {
             error: 'number missing' 
         })
     }
-    else if (persons.find(item => item.name === body.name)) {
-        return response.status(400).json({ 
-            error: 'name must be unique' 
+    
+    Person.find({}).then(persons => {
+        if (persons.find(item => item.name === body.name)) {
+            return response.status(400).json({ 
+                error: 'name must be unique' 
+            })
+        }
+        // 如果名字是唯一的，继续处理 POST 请求...
+        const newPerson = new Person({
+            name: body.name,
+            number: body.number,
         })
-    }
-
-    const person = {
-        id: generateRandomId(),
-        ...body
-    }
-    persons = persons.concat(person)
-
-    response.json(person)
+    
+        newPerson.save().then(savedPerson => {
+            response.json(savedPerson)
+        })
+    })
 })
 
 
 
-//const PORT = 3001
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
