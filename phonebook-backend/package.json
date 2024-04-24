@@ -10,12 +10,16 @@
     "build:ui": "@powershell Remove-Item -Recurse -Force dist && cd ../../FullStackOpenExercise/part2/phonebook-frontend && npm run build && @powershell Copy-Item dist -Recurse ../../../FSOpart3/phonebook-backend/dist",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "fly logs"
+    "logs:prod": "fly logs",
+    "lint": "eslint ."
   },
   "author": "Caedan Wang",
   "license": "MIT",
   "devDependencies": {
     "@flydotio/dockerfile": "^0.5.5",
+    "@stylistic/eslint-plugin-js": "^1.7.2",
+    "eslint": "^8.0.0",
+    "eslint-plugin-react": "^7.34.1",
     "nodemon": "^3.1.0"
   },
   "dependencies": {

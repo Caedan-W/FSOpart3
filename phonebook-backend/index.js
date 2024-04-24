@@ -12,10 +12,10 @@ app.use(express.json())
 app.use(express.static('dist'))
 
 // 自定义 token 函数，用于记录请求体
-morgan.token('req-body', (req, res) => JSON.stringify(req.body));
+morgan.token('req-body', (req) => JSON.stringify(req.body))
 
 // 使用 morgan 中间件，并添加自定义 token 函数
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :req-body'));
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms - :req-body'))
 
 /*
 let persons = [
@@ -59,7 +59,7 @@ app.get('/api/persons', (request, response, next) => {
 app.get('/api/persons/:id', (request, response, next) => {
     Person.findById(request.params.id)
         .then(person => {
-                response.json(person)
+            response.json(person)
         })
         .catch(error => next(error))
         /*
@@ -77,18 +77,19 @@ app.get('/info',(request, response, next) => {
     // console.log('typeof returnedPerson', typeof returnedPerson)
     // console.log('returnedPerson ', returnedPerson)
     // returnedPerson.then(person => console.log('then, returnedPerson', person))
-    const time = new Date().toString();
+    const time = new Date().toString()
     //console.log(time)
-    returnedPerson.then(person => {
-        response.send(`Phonebook has info for ${person.length} people<br><br>${time}`)
-    })
-    .catch(error => next(error))
+    returnedPerson
+        .then(person => {
+            response.send(`Phonebook has info for ${person.length} people<br><br>${time}`)
+        })
+        .catch(error => next(error))
 })
 
 
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndDelete(request.params.id)
-        .then(result => {
+        .then(() => {
             response.status(204).end()
         })
         .catch(error => next(error))
@@ -121,13 +122,14 @@ app.post('/api/persons', (request, response, next) => {
             number: body.number,
         })
     
-        newPerson.save()
+        newPerson
+            .save()
             .then(savedPerson => {
                 response.json(savedPerson)
             })
             .catch(error => next(error))
     })
-    .catch(error => next(error))
+        .catch(error => next(error))
 })
 
 
@@ -171,5 +173,5 @@ const errorHandler = (error, request, response, next) => {
 
     next(error)
 }
-  // this has to be the last loaded middleware, also all the routes should be registered before this!
+// this has to be the last loaded middleware, also all the routes should be registered before this!
 app.use(errorHandler)
